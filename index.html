@@ -651,6 +651,33 @@
     });
     return list;
   }
+  function omkPickAggregateBonuses(bonusList){
+    var percentByKey = {};
+    var otherByKey = {};
+    bonusList.forEach(function(b){
+      var m = b.match(/^([+-]?)(\d+)%\s*(.+)$/);
+      if(m){
+        var sign = (m[1] === '-' ? -1 : 1);
+        var val = parseInt(m[2], 10) * sign;
+        var key = m[3].trim();
+        percentByKey[key] = (percentByKey[key] || 0) + val;
+      } else {
+        var k = b.trim();
+        if(!otherByKey[k]) otherByKey[k] = [];
+        otherByKey[k].push(b);
+      }
+    });
+    var out = [];
+    Object.keys(percentByKey).sort().forEach(function(key){
+      var v = percentByKey[key];
+      var sign = v >= 0 ? '+' : '';
+      out.push({ type: 'percent', text: sign + v + '% ' + key });
+    });
+    Object.keys(otherByKey).forEach(function(key){
+      out.push({ type: 'other', text: key });
+    });
+    return out;
+  }
   function omkPickUpdate(){
     var container = document.getElementById("omkPickCompartments");
     var used = omkPickGetUsedOperators();
@@ -722,8 +749,9 @@
       var bonusDiv = document.createElement("div");
       bonusDiv.className = "omk-bonuses";
       if(bonuses.length) {
+        var aggregated = omkPickAggregateBonuses(bonuses);
         var ul = document.createElement("ul");
-        bonuses.forEach(function(b){ var li = document.createElement("li"); li.textContent = b; ul.appendChild(li); });
+        aggregated.forEach(function(item){ var li = document.createElement("li"); li.textContent = item.text; if(item.type === 'percent') li.style.fontWeight = '600'; ul.appendChild(li); });
         bonusDiv.appendChild(ul);
       } else bonusDiv.textContent = "Итоговые бонусы отсека появятся после выбора оперативников.";
       compDiv.appendChild(bonusDiv);
