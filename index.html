@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Экипировка и эссенции</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: #f0f2f5; color: #202124; font-size: 16px; padding: 16px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e8eaed; padding-bottom: 0; }
+    .tabs button { padding: 12px 20px; border: none; background: none; cursor: pointer; font-size: 15px; color: #5f6368; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .tabs button:hover { color: #1a73e8; }
+    .tabs button.active { color: #1a73e8; font-weight: 600; border-bottom-color: #1a73e8; }
+    .mode { display: none; }
+    .mode.active { display: block; }
+    .subtitle { color: #5f6368; font-size: 14px; margin: 4px 0 14px 0; line-height: 1.4; }
+    h2 { color: #1a73e8; margin: 0 0 10px 0; font-size: 1.3em; font-weight: 600; }
+    .breadcrumb { font-size: 14px; color: #5f6368; margin-bottom: 14px; padding: 8px 12px; background: #e8eaed; border-radius: 8px; }
+    .breadcrumb span { color: #1a73e8; font-weight: 500; }
+    .breadcrumb .sep { margin: 0 4px; color: #9aa0a6; }
+    button.list-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 12px 14px; margin: 6px 0; border: none; border-radius: 8px; background: #fff;
+      text-align: left; font-size: 15px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      transition: background 0.2s, transform 0.15s;
+    }
+    button.list-btn:hover { background: #e8f0fe; transform: translateX(2px); }
+    button.list-btn .count { font-size: 12px; color: #5f6368; background: #f1f3f4; padding: 3px 8px; border-radius: 10px; margin-left: 8px; }
+    button.list-btn.empty .count { background: #fce8e6; color: #c5221f; }
+    button.back { background: #f1f3f4; color: #5f6368; max-width: 110px; justify-content: center; padding: 10px 14px; font-size: 14px; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .header h2 { flex: 1; }
+    .result-item { padding: 12px 14px; margin: 6px 0; background: #e8f0fe; border-radius: 8px; font-weight: 500; font-size: 15px; border-left: 4px solid #1a73e8; display: flex; align-items: center; gap: 10px; }
+    .result-num { width: 26px; height: 26px; background: #1a73e8; color: #fff; border-radius: 50%; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .summary-line { font-size: 14px; color: #5f6368; margin-bottom: 10px; padding: 10px 12px; background: #f1f3f4; border-radius: 6px; }
+    .summary-line strong { color: #202124; }
+    .block-title { font-size: 13px; font-weight: 600; color: #1a73e8; margin: 14px 0 6px 0; padding-bottom: 4px; border-bottom: 1px solid #e8eaed; }
+    .match-card { background: #fff; border-radius: 8px; padding: 10px 12px; margin: 6px 0; box-shadow: 0 1px 2px rgba(0,0,0,0.08); border-left: 4px solid #1a73e8; }
+    .match-card.three { border-left-color: #0d9d57; background: #e6f4ea; }
+    .match-card.two { border-left-color: #f9ab00; background: #fef7e0; }
+    .match-card .where { font-size: 12px; color: #5f6368; margin-bottom: 4px; }
+    .match-card .essence-name { font-weight: 600; margin-bottom: 4px; }
+    .match-card .matched { font-size: 12px; color: #0d9d57; }
+    .match-card.two .matched { color: #b36b00; }
+    .weapon-stats { font-size: 13px; color: #5f6368; margin: 8px 0 10px 0; padding: 10px; background: #f1f3f4; border-radius: 6px; }
+    .weapon-stats span { display: block; margin: 2px 0; }
+    #essenceResultsList { max-height: 360px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button type="button" class="tab-btn active" data-mode="equip">Экипировка</button>
+    <button type="button" class="tab-btn" data-mode="essence">Эссенции под оружие</button>
+  </div>
+
+  <div id="mode-equip" class="mode active">
+    <div class="breadcrumb" id="equipBreadcrumb"></div>
+    <div id="equipStep1" class="step active">
+      <h2>Выберите комплект</h2>
+      <p class="subtitle">Выберите набор экипировки, затем слот и характеристику.</p>
+      <div id="equipMainList"></div>
+    </div>
+    <div id="equipStep2" class="step">
+      <div class="header">
+        <h2 id="equipStep2Title">Выберите слот</h2>
+        <button type="button" class="back list-btn" onclick="equipGoBack(1)">← Назад</button>
+      </div>
+      <div id="equipItemsList"></div>
+    </div>
+    <div id="equipStep3" class="step">
+      <div class="header">
+        <h2 id="equipStep3Title">Выберите характеристику</h2>
+        <button type="button" class="back list-btn" onclick="equipGoBack(2)">← Назад</button>
+      </div>
+      <div id="equipTraitsList"></div>
+    </div>
+    <div id="equipStep4" class="step">
+      <div class="header">
+        <h2>Подходящие предметы</h2>
+        <button type="button" class="back list-btn" onclick="equipGoBack(3)">← Назад</button>
+      </div>
+      <div class="summary-line" id="equipSummaryLine"></div>
+      <div id="equipResultsList"></div>
+    </div>
+  </div>
+
+  <div id="mode-essence" class="mode">
+    <div id="essenceStep1" class="step active">
+      <h2>Выберите оружие</h2>
+      <p class="subtitle">Показаны эссенции с совпадением 3 из 3 и 2 из 3 показателей и места, где они падают.</p>
+      <div id="essenceWeaponList"></div>
+    </div>
+    <div id="essenceStep2" class="step">
+      <div class="header">
+        <h2>Совпадения эссенций</h2>
+        <button type="button" class="back list-btn" onclick="essenceGoBack()">← Назад</button>
+      </div>
+      <div id="essenceWeaponStats" class="weapon-stats"></div>
+      <div id="essenceResultsList"></div>
+    </div>
+  </div>
+
+  <script>
+(function() {
+  var DATA = {"Вечный ксиранит":{"Манипулятор":{"Воля":["Печать защитника К1","Щитовой инъектор \"Рысь\""],"Интеллект":["Пример: Книга мудреца","Пример: Амулет знаний"],"Скорость накопления суперэнергии":["Пример: Кристалл ускорения","Пример: Резонатор"]},"Энергетическое ядро":{"Воля":["Ядро Воля-1","Ядро Воля-2"],"Интеллект":["Печать защитника","Пирометр \"Термоудар\"","Калибратор \"Импульс\""],"Сила":["Жетон защитника","Кислородная трубка \"Висячая река\"","Радар \"Инлун-50\"","Повязка охраны \"Мьешко\"","Аккумулятор \"Термоудар\"","Рация \"Колонист\" К1","Рация \"Колонист\"","Аналитический браслет \"Эфиртех\"","Коннектор \"Рысь\" К1","Коннектор \"Рысь\""],"Скорость накопления суперэнергии":["Печать защитника"]},"Энергетическое ядро К1":{"Интеллект":["Печать защитника","Пирометр \"Термоудар\"","Калибратор \"Импульс\""],"Воля":["Печать защитника К1","Манипулятор \"Вечный ксиранит\"","Нож \"Инлун-50\"","Тычковый нож охраны \"Мьешко\" К1","Тычковый нож охраны \"Мьешко\"","Картридж энергии \"Термоудар\"","Костоломская фигурка К1","Костоломская фигурка","Щитовой инъектор \"Рысь\"","Пластина \"Рысь\""],"Бонус лечения":["Щитовой инъектор \"Рысь\""]},"Перчатки":{},"Перчатки К1":{},"Броня":{}},"Натиск прилива":{},"Инлун-50":{},"Охраны \"Мьешко\"":{},"Термоудар":{},"Колонист":{},"Импульс":{},"Игра в костолома":{},"Эфиртех":{},"Рысь":{},"Мастер меча":{}};
+  var WEAPONS = [{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Безупречная репутация","main":"Осн. Показатель","secondary":"Физа","skill":"Жестокость"},{"name":"Былой шик","main":"Воля","secondary":"ОЗ","skill":"Эффективность"},{"name":"Великое видение","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Водоплаволов 3.0","main":"Сила","secondary":"Крио","skill":"Подавление"},{"name":"Гарантированная доставка","main":"Воля","secondary":"Накопление СЭ","skill":"Азарт"},{"name":"Гнев кузни","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Громберг","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Доблесть","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Двенадцать вопросов","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Дикий странник","main":"Интеллект","secondary":"Электро","skill":"Поражение"},{"name":"Древний канал","main":"Сила","secondary":"Сила искусств","skill":"Жестокость"},{"name":"Забвение","main":"Интеллект","secondary":"Урон искусств","skill":"Сумерки"},{"name":"Звезда белых ночей","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Поражение"},{"name":"Искатель темного луна","main":"Сила","secondary":"Накопление СЭ","skill":"Детонация"},{"name":"Кланнибал","main":"Осн. Показатель","secondary":"Урон искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Мечта о звездном береге","main":"Интеллект","secondary":"Эфф. лечения","skill":"Поражение"},{"name":"Модуль взрыва","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Детонация"},{"name":"Монаихэ","main":"Воля","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Навигатор","main":"Интеллект","secondary":"Крио","skill":"Поражение"},{"name":"Неустанность","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Ночной факел","main":"Интеллект","secondary":"Тепло","skill":"Поражение"},{"name":"Опус Травления","main":"Воля","secondary":"Природа","skill":"Подавление"},{"name":"Опус живого","main":"Ловкость","secondary":"Урон искусств","skill":"Поражение"},{"name":"Прочное притяжение","main":"Воля","secondary":"Электро","skill":"Подавление"},{"name":"Прощальный обет","main":"Сила","secondary":"Тепло","skill":"Азарт"},{"name":"Реактивная Пика","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"Резкий подъем","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Сумерки"},{"name":"Растерзанный принц","main":"Сила","secondary":"Шанс крита","skill":"Разрушение"},{"name":"Рыцарская добродетель","main":"Воля","secondary":"ОЗ","skill":"Лечение"},{"name":"Свободное служение","main":"Воля","secondary":"Эфф. лечения","skill":"Лечение"},{"name":"Скала","main":"Интеллект","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Стальной раскол","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Станс памяти","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Термитный резак","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Устремление","main":"Ловкость","secondary":"Физа","skill":"Сумерки"},{"name":"Финальный вызов","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Хравенгер","main":"Сила","secondary":"Атака","skill":"Детонация"},{"name":"Хранитель Горы","main":"Ловкость","secondary":"Физа","skill":"Эффективность"},{"name":"Химера правосудия","main":"Сила","secondary":"Накопление СЭ","skill":"Жестокость"},{"name":"Эталон","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"ОВЈ Идентификатор искусств","main":"Интеллект","secondary":"Сила искусств","skill":"Азарт"},{"name":"ОВЈ Клинок света","main":"Ловкость","secondary":"Атака","skill":"Поток"},{"name":"ОВЈ Прыть","main":"Ловкость","secondary":"Накопление СЭ","skill":"Детонация"},{"name":"ОВЈ Рог-бритва","main":"Воля","secondary":"Физа","skill":"Поражение"},{"name":"ОВЈ Тяжелое бремя","main":"Сила","secondary":"ОЗ","skill":"Эффективность"}];
+  var ESSENCE_LOCATIONS = [{"locationName":"Первое месторождение","essences":[{"name":"Безупречная репутация","main":"Осн. Показатель","secondary":"Физа","skill":"Жестокость"},{"name":"Былой шик","main":"Воля","secondary":"ОЗ","skill":"Эффективность"},{"name":"Доблесть","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Звезда белых ночей","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Мечта о звездном береге","main":"Интеллект","secondary":"Эфф. лечения","skill":"Поражение"},{"name":"Модуль взрыва","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Детонация"},{"name":"Навигатор","main":"Интеллект","secondary":"Крио","skill":"Поражение"},{"name":"Ночной факел","main":"Интеллект","secondary":"Тепло","skill":"Поражение"},{"name":"Опус Травления","main":"Воля","secondary":"Природа","skill":"Подавление"},{"name":"Резкий подъем","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Сумерки"},{"name":"Хранитель Горы","main":"Ловкость","secondary":"Физа","skill":"Эффективность"},{"name":"Водоплаволов 3.0","main":"Сила","secondary":"Крио","skill":"Подавление"},{"name":"Древний канал","main":"Сила","secondary":"Сила искусств","skill":"Жестокость"},{"name":"Стальной раскол","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Устремление","main":"Ловкость","secondary":"Физа","skill":"Сумерки"},{"name":"ОВЈ Тяжелое бремя","main":"Сила","secondary":"ОЗ","skill":"Эффективность"}]},{"locationName":"Плато Энергии","essences":[{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Безупречная репутация","main":"Осн. Показатель","secondary":"Физа","skill":"Жестокость"},{"name":"Великое видение","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Громберг","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Звезда белых ночей","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Мечта о звездном береге","main":"Интеллект","secondary":"Эфф. лечения","skill":"Поражение"},{"name":"Неустанность","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Ночной факел","main":"Интеллект","secondary":"Тепло","skill":"Поражение"},{"name":"Растерзанный принц","main":"Сила","secondary":"Шанс крита","skill":"Разрушение"},{"name":"Рыцарская добродетель","main":"Воля","secondary":"ОЗ","skill":"Лечение"},{"name":"Термитный резак","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Двенадцать вопросов","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Древний канал","main":"Сила","secondary":"Сила искусств","skill":"Жестокость"},{"name":"Прощальный обет","main":"Сила","secondary":"Тепло","skill":"Азарт"},{"name":"Свободное служение","main":"Воля","secondary":"Эфф. лечения","skill":"Лечение"},{"name":"Финальный вызов","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"ОВЈ Идентификатор искусств","main":"Интеллект","secondary":"Сила искусств","skill":"Азарт"},{"name":"ОВЈ Клинок света","main":"Ловкость","secondary":"Атака","skill":"Поток"},{"name":"ОВЈ Рог-бритва","main":"Воля","secondary":"Физа","skill":"Поражение"}]},{"locationName":"Улин","essences":[{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Гнев кузни","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Громберг","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Забвение","main":"Интеллект","secondary":"Урон искусств","skill":"Сумерки"},{"name":"Неустанность","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Растерзанный принц","main":"Сила","secondary":"Шанс крита","skill":"Разрушение"},{"name":"Резкий подъем","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Сумерки"},{"name":"Рыцарская добродетель","main":"Воля","secondary":"ОЗ","skill":"Лечение"},{"name":"Термитный резак","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Хравенгер","main":"Сила","secondary":"Атака","skill":"Детонация"},{"name":"Искатель темного луна","main":"Сила","secondary":"Накопление СЭ","skill":"Детонация"},{"name":"Свободное служение","main":"Воля","secondary":"Эфф. лечения","skill":"Лечение"},{"name":"Станс памяти","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Финальный вызов","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Химера правосудия","main":"Сила","secondary":"Накопление СЭ","skill":"Жестокость"},{"name":"ОВЈ Клинок света","main":"Ловкость","secondary":"Атака","skill":"Поток"},{"name":"ОВЈ Прыть","main":"Ловкость","secondary":"Накопление СЭ","skill":"Детонация"}]},{"locationName":"Центр исследования ориджиния","essences":[{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Великое видение","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Гарантированная доставка","main":"Воля","secondary":"Накопление СЭ","skill":"Азарт"},{"name":"Доблесть","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Кланнибал","main":"Осн. Показатель","secondary":"Урон искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Навигатор","main":"Интеллект","secondary":"Крио","skill":"Поражение"},{"name":"Опус Травления","main":"Воля","secondary":"Природа","skill":"Подавление"},{"name":"Реактивная Пика","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"Хранитель Горы","main":"Ловкость","secondary":"Физа","skill":"Эффективность"},{"name":"Эталон","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"Водоплаволов 3.0","main":"Сила","secondary":"Крио","skill":"Подавление"},{"name":"Двенадцать вопросов","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Дикий странник","main":"Интеллект","secondary":"Электро","skill":"Поражение"},{"name":"Монаихэ","main":"Воля","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Опус живого","main":"Ловкость","secondary":"Урон искусств","skill":"Поражение"},{"name":"Прочное притяжение","main":"Воля","secondary":"Электро","skill":"Подавление"},{"name":"Скала","main":"Интеллект","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Стальной раскол","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"ОВЈ Рог-бритва","main":"Воля","secondary":"Физа","skill":"Поражение"}]}];
+  function escapeHtml(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+  document.querySelectorAll(".tab-btn").forEach(function(b){b.onclick=function(){var m=this.getAttribute("data-mode");document.querySelectorAll(".tab-btn").forEach(function(x){x.classList.remove("active");});document.querySelectorAll(".mode").forEach(function(x){x.classList.remove("active");});this.classList.add("active");document.getElementById("mode-"+m).classList.add("active");};});
+  var equipMain="",equipItem="";
+  function setEquipBreadcrumb(p){var el=document.getElementById("equipBreadcrumb");el.innerHTML=p&&p.length?p.map(function(x,i){return i?"<span class=\"sep\">›</span><span>"+escapeHtml(x)+"</span>":"<span>"+escapeHtml(x)+"</span>";}).join(""):"";}
+  function countItems(a){return Array.isArray(a)?a.length:0;}
+  function hasItems(s){for(var k in s)if(countItems(s[k])>0)return true;return false;}
+  function equipShowStep(n){[1,2,3,4].forEach(function(i){document.getElementById("equipStep"+i).classList.toggle("active",i===n);});}
+  function equipInit(){var list=document.getElementById("equipMainList");list.innerHTML="";Object.keys(DATA).forEach(function(name){var slots=DATA[name],total=Object.keys(slots).length,withItems=Object.keys(slots).filter(function(s){return hasItems(slots[s]);}).length,btn=document.createElement("button");btn.className="list-btn"+(withItems===0?" empty":"");btn.innerHTML="<span>"+escapeHtml(name)+"</span><span class=\"count\">"+total+" слотов</span>";btn.onclick=function(){equipSelectMain(name);};list.appendChild(btn);});setEquipBreadcrumb([]);equipShowStep(1);}
+  function equipSelectMain(name){equipMain=name;equipItem="";document.getElementById("equipStep2Title").textContent="Слот: "+name;setEquipBreadcrumb([name]);var list=document.getElementById("equipItemsList");list.innerHTML="";var slots=DATA[name];Object.keys(slots).forEach(function(item){var slotData=slots[item],n=Object.keys(slotData).length,totalItems=0;for(var t in slotData)totalItems+=countItems(slotData[t]);var btn=document.createElement("button");btn.className="list-btn"+(totalItems===0?" empty":"");btn.innerHTML="<span>"+escapeHtml(item)+"</span><span class=\"count\">"+n+" хар., "+totalItems+" пред.</span>";btn.onclick=function(){equipSelectItem(item);};list.appendChild(btn);});equipShowStep(2);}
+  function equipSelectItem(item){equipItem=item;document.getElementById("equipStep3Title").textContent="Характеристика: "+item;setEquipBreadcrumb([equipMain,item]);var list=document.getElementById("equipTraitsList");list.innerHTML="";var slotData=DATA[equipMain][item];Object.keys(slotData).forEach(function(trait){var cnt=countItems(slotData[trait]),btn=document.createElement("button");btn.className="list-btn"+(cnt===0?" empty":"");btn.innerHTML="<span>"+escapeHtml(trait)+"</span><span class=\"count\">"+cnt+" пред.</span>";btn.onclick=function(){equipSelectTrait(trait);};list.appendChild(btn);});equipShowStep(3);}
+  function equipSelectTrait(trait){setEquipBreadcrumb([equipMain,equipItem,trait]);var items=DATA[equipMain][equipItem][trait]||[];document.getElementById("equipSummaryLine").innerHTML="<strong>Комплект:</strong> "+escapeHtml(equipMain)+" → <strong>Слот:</strong> "+escapeHtml(equipItem)+" → <strong>Характеристика:</strong> "+escapeHtml(trait)+" <span style=\"color:#5f6368\">("+items.length+")</span>";var list=document.getElementById("equipResultsList");list.innerHTML="";items.forEach(function(res,i){var div=document.createElement("div");div.className="result-item";div.innerHTML="<span class=\"result-num\">"+(i+1)+"</span><span>"+escapeHtml(res)+"</span>";list.appendChild(div);});equipShowStep(4);}
+  function equipGoBack(n){if(n===1){equipMain="";equipItem="";setEquipBreadcrumb([]);}if(n===2){equipItem="";setEquipBreadcrumb([equipMain]);}if(n===3)setEquipBreadcrumb([equipMain,equipItem]);equipShowStep(n);}
+  function countMatches(w,e){var m=[];if(w.main===e.main)m.push("Основные");if(w.secondary===e.secondary)m.push("Побочные");if(w.skill===e.skill)m.push("Навыки");return m;}
+  function essenceInit(){var list=document.getElementById("essenceWeaponList");list.innerHTML="";WEAPONS.forEach(function(w){var btn=document.createElement("button");btn.className="list-btn";btn.textContent=w.name;btn.onclick=function(){essenceSelectWeapon(w);};list.appendChild(btn);});document.getElementById("essenceStep1").classList.add("active");document.getElementById("essenceStep2").classList.remove("active");}
+  function essenceSelectWeapon(weapon){var results={full:[],partial:[]},seen={};ESSENCE_LOCATIONS.forEach(function(loc){loc.essences.forEach(function(ess){var matched=countMatches(weapon,ess),key=loc.locationName+"|"+ess.name;if(seen[key])return;seen[key]=true;var entry={locationName:loc.locationName,essenceName:ess.name,matched:matched};if(matched.length===3)results.full.push(entry);else if(matched.length===2)results.partial.push(entry);});});document.getElementById("essenceWeaponStats").innerHTML="<span><strong>Основные:</strong> "+escapeHtml(weapon.main)+"</span><span><strong>Побочные:</strong> "+escapeHtml(weapon.secondary)+"</span><span><strong>Навыки:</strong> "+escapeHtml(weapon.skill)+"</span>";var listEl=document.getElementById("essenceResultsList");listEl.innerHTML="";if(results.full.length===0&&results.partial.length===0)listEl.innerHTML="<p style=\"color:#5f6368;padding:12px;\">Нет эссенций с совпадением 2 или 3 показателей.</p>";else{if(results.full.length>0){var b3=document.createElement("div");b3.innerHTML="<div class=\"block-title\">Совпадение 3 из 3</div>";results.full.forEach(function(e){var card=document.createElement("div");card.className="match-card three";card.innerHTML="<div class=\"essence-name\">"+escapeHtml(e.essenceName)+"</div><div class=\"where\"><strong>Место:</strong> "+escapeHtml(e.locationName)+"</div><div class=\"matched\">Совпадают: "+e.matched.join(", ")+"</div>";b3.appendChild(card);});listEl.appendChild(b3);}if(results.partial.length>0){var b2=document.createElement("div");b2.innerHTML="<div class=\"block-title\">Совпадение 2 из 3</div>";results.partial.forEach(function(e){var card=document.createElement("div");card.className="match-card two";card.innerHTML="<div class=\"essence-name\">"+escapeHtml(e.essenceName)+"</div><div class=\"where\"><strong>Место:</strong> "+escapeHtml(e.locationName)+"</div><div class=\"matched\">Совпадают: "+e.matched.join(", ")+"</div>";b2.appendChild(card);});listEl.appendChild(b2);}}document.getElementById("essenceStep1").classList.remove("active");document.getElementById("essenceStep2").classList.add("active");}
+  function essenceGoBack(){document.getElementById("essenceStep2").classList.remove("active");document.getElementById("essenceStep1").classList.add("active");}
+  window.equipGoBack=equipGoBack;window.essenceGoBack=essenceGoBack;
+  window.addEventListener("DOMContentLoaded",function(){equipInit();essenceInit();});
+})();
+  </script>
+</body>
+</html>
