@@ -7,10 +7,11 @@
   <style>
     * { box-sizing: border-box; }
     body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; background: #f0f2f5; color: #202124; font-size: 16px; padding: 16px; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e8eaed; padding-bottom: 0; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #e8eaed; padding-bottom: 0; }
     .tabs button { padding: 12px 20px; border: none; background: none; cursor: pointer; font-size: 15px; color: #5f6368; border-bottom: 3px solid transparent; margin-bottom: -2px; }
     .tabs button:hover { color: #1a73e8; }
     .tabs button.active { color: #1a73e8; font-weight: 600; border-bottom-color: #1a73e8; }
+    .tabs button:disabled { color: #9aa0a6; cursor: not-allowed; opacity: 0.85; }
     .mode { display: none; }
     .mode.active { display: block; }
     .subtitle { color: #5f6368; font-size: 14px; margin: 4px 0 14px 0; line-height: 1.4; }
@@ -47,15 +48,53 @@
     .weapon-stats { font-size: 13px; color: #5f6368; margin: 8px 0 10px 0; padding: 10px; background: #f1f3f4; border-radius: 6px; }
     .weapon-stats span { display: block; margin: 2px 0; }
     #essenceResultsList { max-height: 360px; overflow-y: auto; }
+    .sheet-wrap { margin-top: 12px; border-radius: 8px; overflow: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: #fff; max-height: 70vh; }
+    .outpost-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .outpost-table th, .outpost-table td { border: 1px solid #e8eaed; padding: 8px 10px; text-align: left; vertical-align: top; }
+    .outpost-table th { background: #1a73e8; color: #fff; font-weight: 600; }
+    .outpost-table thead th.sub { background: #4285f4; font-size: 12px; }
+    .outpost-table tbody tr:nth-child(even) { background: #f8f9fa; }
+    .outpost-table tbody tr:hover { background: #e8f0fe; }
+    .outpost-table .score { white-space: nowrap; font-weight: 600; }
+    .outpost-table .score-3 { color: #0d9d57; }
+    .outpost-table .score-2 { color: #b36b00; }
+    .outpost-table .score-0 { color: #9aa0a6; }
+    .outpost-table .note { font-size: 11px; color: #5f6368; margin-top: 2px; }
+    .table-caption { font-size: 12px; color: #5f6368; margin-bottom: 8px; }
+    .essence-ref-section { margin-bottom: 0; min-width: 0; }
+    .essence-ref-title { font-size: 1.1em; font-weight: 700; margin: 0; padding: 10px 10px 8px 10px; background: #e8f0fe; color: #1a73e8; border: 1px solid #e8eaed; border-bottom: none; border-radius: 8px 8px 0 0; }
+    .essence-ref-section table { margin: 0; border-radius: 0 0 8px 8px; }
+    .essence-ref-section .outpost-table thead th.col-span { text-align: center; }
+    #mode-essence-ref .sheet-wrap { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; align-content: start; }
+    @media (max-width: 900px) {
+      #mode-essence-ref .sheet-wrap { grid-template-columns: 1fr; }
+    }
+    .omk-compartment { background: #fff; border: 1px solid #e8eaed; border-radius: 8px; padding: 12px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+    .omk-compartment h3 { margin: 0 0 10px 0; font-size: 1em; color: #1a73e8; }
+    .omk-slot { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .omk-slot select { padding: 6px 10px; border-radius: 6px; border: 1px solid #e8eaed; font-size: 13px; min-width: 140px; }
+    .omk-slot select.level { min-width: 60px; }
+    .omk-bonuses { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e8eaed; font-size: 13px; color: #5f6368; }
+    .omk-bonuses ul { margin: 0; padding-left: 18px; }
+    .omk-slot select.omk-op option.omk-best { font-weight: 700; color: #0d47a1; }
+    .omk-slot select.omk-op option.omk-has-bonus { color: #1a73e8; }
+    .omk-slot select.omk-op optgroup { font-weight: 600; margin-top: 6px; }
+    .omk-slot select.omk-op optgroup.omk-g-best { color: #0d9d57; }
+    .omk-slot select.omk-op optgroup.omk-g-bonus { color: #1a73e8; }
   </style>
 </head>
 <body>
   <div class="tabs">
-    <button type="button" class="tab-btn active" data-mode="equip">Экипировка</button>
-    <button type="button" class="tab-btn" data-mode="essence">Эссенции под оружие</button>
+    <button type="button" class="tab-btn" data-mode="equip" disabled title="В разработке">Экипировка (в разработке)</button>
+    <button type="button" class="tab-btn active" data-mode="essence">Эссенции под оружие</button>
+    <button type="button" class="tab-btn" data-mode="sheet">Долина IV</button>
+    <button type="button" class="tab-btn" data-mode="ulin">Улин</button>
+    <button type="button" class="tab-btn" data-mode="omk">ОМК ДИЦЗЯН</button>
+    <button type="button" class="tab-btn" data-mode="omk-pick">ОМК подбор</button>
+    <button type="button" class="tab-btn" data-mode="essence-ref">Справочник эссенций</button>
   </div>
 
-  <div id="mode-equip" class="mode active">
+  <div id="mode-equip" class="mode">
     <div class="breadcrumb" id="equipBreadcrumb"></div>
     <div id="equipStep1" class="step active">
       <h2>Выберите комплект</h2>
@@ -86,7 +125,447 @@
     </div>
   </div>
 
-  <div id="mode-essence" class="mode">
+  <div id="mode-sheet" class="mode">
+    <h2>Оперативники Arknight Enfield — аванпосты Долина IV</h2>
+    <p class="table-caption">Автор @DeadKDV UID:6583381579.</p>
+    <div class="sheet-wrap">
+      <table class="outpost-table">
+        <thead>
+          <tr>
+            <th colspan="3">Лагерь беженцев</th>
+            <th colspan="3">Штаб реконструкции</th>
+            <th colspan="3">Инфрастанция</th>
+          </tr>
+          <tr class="sub">
+            <th>Опер.</th><th>Оценка</th><th>Бонусы</th>
+            <th>Опер.</th><th>Оценка</th><th>Бонусы</th>
+            <th>Опер.</th><th>Оценка</th><th>Бонусы</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Лэватейн</td><td class="score score-3">3\3</td><td>+20% шанс удвоение очка за развитие, торговлю, работу</td>
+            <td>Ивонна</td><td class="score score-3">3\3</td><td>+20% шанс удвоение очка за развитие, торговлю, работу</td>
+            <td>Гилберта</td><td class="score score-3">3\3</td><td>+20% шанс удвоение очка за развитие, торговлю, работу</td>
+          </tr>
+          <tr>
+            <td>Антал</td><td class="score score-2">2\3</td><td>+20% шанс удвоение очка за торговлю, за работу</td>
+            <td>Сайхи</td><td class="score">1\3</td><td>+20% шанс удвоение очка за торговлю</td>
+            <td>Порганичник</td><td class="score score-2">2\3</td><td>+20% шанс удвоение очка за развитие, за торговлю</td>
+          </tr>
+          <tr>
+            <td>Флюорит</td><td class="score">1\3</td><td>+20% шанс удвоение очка за торговлю</td>
+            <td>Флюорит</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Алеш</td><td class="score">1\3</td><td>+20% шанс удвоение очка за торговлю</td>
+          </tr>
+          <tr>
+            <td>Вульфгард</td><td class="score">1\3</td><td>+20% шанс удвоение очка за торговлю</td>
+            <td>Акэкури</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Перлика</td><td class="score">1\3</td><td>+20% шанс удвоение очка за торговлю</td>
+          </tr>
+          <tr>
+            <td>Перлика</td><td class="score">1\3</td><td>+20% шанс удвоение очка за торговлю</td>
+            <td>Вульфгард</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Чэнь Цяньюй</td><td class="score">1\3</td><td>+20% шанс удвоение очка за торговлю</td>
+          </tr>
+          <tr>
+            <td>Порганичник</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Чэнь Цяньюй</td><td class="score score-2">2\3</td><td>+20% шанс удвоение очка за развитие, за работу</td>
+            <td>Лэватейн</td><td class="score score-2">2\3</td><td>+20% шанс удвоение очка за развитие, за работу</td>
+          </tr>
+          <tr>
+            <td>Арделия</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Антал</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Арделия</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+          </tr>
+          <tr>
+            <td>Светоснежка</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Эстелла</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Светоснежка</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+          </tr>
+          <tr>
+            <td>Гилберта</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Кэтчер</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Антал</td><td class="score score-0">0\3</td><td>Бонусы отсутствуют</td>
+          </tr>
+          <tr>
+            <td>Ивонна</td><td class="score score-0">0\3</td><td>Бонусы отсутствуют</td>
+            <td>Перлика</td><td class="score">1\3</td><td>+20% шанс удвоение очка за развитие</td>
+            <td>Флюорит</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Акэкури</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Порганичник</td><td class="score score-0">0\3</td><td>Бонусы отсутствуют</td>
+            <td>Эстелла</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Лифэн</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Арделия</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Кэтчер</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Сайхи</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Да Пан</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Акэкури</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Да Пан</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Лэватейн</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Да Пан</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Чэнь Цяньюй</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Лифэн</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Ивонна</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Кэтчер</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Светоснежка</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Лифэн</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Алеш</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Гилберта</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Авивенна</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Эстелла</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Авивенна</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Сайхи</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Арклайт</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Арклайт</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Арклайт</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td>Авивенна</td><td class="score score-0">0\3</td><td class="note">—</td>
+            <td>Алеш</td><td class="score score-0">0\3</td><td>—</td>
+            <td>Вульфгард</td><td class="score score-0">0\3</td><td>—</td>
+          </tr>
+          <tr>
+            <td colspan="3" style="background:#f8f9fa;">Эмбер — нет данных (отсутствует у автора)</td>
+            <td colspan="3"></td>
+            <td colspan="3"></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="background:#f8f9fa;">Панихида</td>
+            <td colspan="3"></td>
+            <td colspan="3"></td>
+          </tr>
+          <tr>
+            <td colspan="3" style="background:#fef7e0;">Эндминестратор — нельзя установить координатором на аванпост</td>
+            <td colspan="3"></td>
+            <td colspan="3"></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="mode-ulin" class="mode">
+    <h2>Лучшее расположение по аванпостам Улин</h2>
+    <p class="subtitle">Автор @DeadKDV UID:6583381579</p>
+    <div class="sheet-wrap">
+      <table class="outpost-table">
+        <thead>
+          <tr><th colspan="3">Лагерь беженцев</th></tr>
+          <tr class="sub"><th>Опер.</th><th>Оценка</th><th>Бонусы</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Лифэн</td><td class="score score-2">2\3</td><td>+20% шанс удвоение очка за развитие; +20% за торговлю</td></tr>
+          <tr><td>Вульфгард</td><td class="score score-2">2\3</td><td>+20% за торговлю; +20% за работу</td></tr>
+          <tr><td>Арделия</td><td class="score score-2">1\3</td><td>+20% шанс удвоение очка за торговлю</td></tr>
+          <tr><td>Флюорит</td><td class="score score-2">1\3</td><td>+20% шанс удвоение очка за торговлю</td></tr>
+          <tr><td>Авивенна</td><td class="score score-2">1\3</td><td>+20% шанс удвоение очка за торговлю</td></tr>
+          <tr><td>Арклайт</td><td class="score score-2">1\3</td><td>+20% шанс удвоение очка за торговлю</td></tr>
+          <tr><td>Порганичник</td><td class="score score-0">0\3</td><td>Бонусы отсутствуют</td></tr>
+          <tr><td>Алеш</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Антал</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Эстелла</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Кэтчер</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Акэкури</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Да Пан</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Ивонна</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Лэватейн</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Светоснежка</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Гилберта</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Сайхи</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Чэнь Цяньюй</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td>Перлика</td><td class="score score-0">0\3</td><td>—</td></tr>
+          <tr><td colspan="3" style="background:#f8f9fa;">Эмбер — нет данных (отсутствует у автора)</td></tr>
+          <tr><td colspan="3" style="background:#fef7e0;">Эндминестратор — нельзя установить координатором на аванпост</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="mode-omk" class="mode">
+    <h2>Характеристики оперативников на ОМК «ДИЦЗЯН»</h2>
+    <p class="subtitle">Автор @DeadKDV UID:6583381579</p>
+    <div class="sheet-wrap" style="overflow-x: auto;">
+      <table class="outpost-table" style="min-width: 720px;">
+        <thead>
+          <tr>
+            <th>Опер.</th>
+            <th colspan="2">Э1 (20–40)</th>
+            <th colspan="2">Э2 (40–60)</th>
+            <th colspan="2">Э3 (60–80)</th>
+            <th colspan="2">Э4 (80–90)</th>
+          </tr>
+          <tr class="sub">
+            <th></th>
+            <th>Отсек</th><th>Бонус</th>
+            <th>Отсек</th><th>Бонус</th>
+            <th>Отсек</th><th>Бонус</th>
+            <th>Отсек</th><th>Бонус</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Лифэн</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Приемная</td><td>Ув. шанса на зацепку 3</td><td>Контрольный нексус</td><td>+16% подъем настроения всех</td><td>Приемная</td><td>Ув. шанса на зацепку 3</td></tr>
+          <tr><td>Вульфгард</td><td>Производственный отсек</td><td>+10% эфф. производства опыта оперативника</td><td>Инкубационный отсек</td><td>+20% скорости роста редких минералов</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оперативника</td><td>Инкубационный отсек</td><td>+30% скорости роста редких минералов</td></tr>
+          <tr><td>Арделия</td><td>Приемная</td><td>+20% эфф. сбора зацепок</td><td>Приемная</td><td>-14% падения настроения в отсеке</td><td>Приемная</td><td>+30% эфф. сбора зацепок</td><td>Приемная</td><td>-18% падения настроения в отсеке</td></tr>
+          <tr><td>Флюорит</td><td>Инкубационный отсек</td><td>+10% скорости роста редких минералов</td><td>Контрольный нексус</td><td>+12% подъем настроения</td><td>Инкубационный отсек</td><td>+20% скорости роста редких минералов</td><td>Контрольный нексус</td><td>+16% подъем настроения</td></tr>
+          <tr><td>Авивенна</td><td>Контрольный нексус</td><td>+8% подъем настроения всех</td><td>Приемная</td><td>Ув. шанса на зацепку 2</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Приемная</td><td>Ув. шанса на зацепку 2</td></tr>
+          <tr><td>Арклайт</td><td>Производственный отсек</td><td>+10% эфф. производства опыта оружия</td><td>Приемная</td><td>Ув. шанса на зацепку 6</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оружия</td><td>Приемная</td><td>Ув. шанса на зацепку 6</td></tr>
+          <tr><td>Порганичник</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оружия</td><td>Производственный отсек</td><td>-14% падения настроения в отсеке</td><td>Производственный отсек</td><td>+30% эфф. производства опыта оружия</td><td>Производственный отсек</td><td>-18% падения настроения в отсеке</td></tr>
+          <tr><td>Алеш</td><td>Контрольный нексус</td><td>+8% подъем настроения всех</td><td>Приемная</td><td>Ув. шанса на зацепку 1</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Приемная</td><td>Ув. шанса на зацепку 1</td></tr>
+          <tr><td>Антал</td><td>Производственный отсек</td><td>+10% эфф. производства опыта оружия</td><td>Инкубационный отсек</td><td>-14% падения настроения в отсеке</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оружия</td><td>Инкубационный отсек</td><td>—</td></tr>
+          <tr><td>Эстелла</td><td>Контрольный нексус</td><td>+8% подъем настроения всех</td><td>Приемная</td><td>+20% эфф. сбора зацепок</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Приемная</td><td>+30% эфф. сбора зацепок</td></tr>
+          <tr><td>Кэтчер</td><td>Контрольный нексус</td><td>+8% подъем настроения всех</td><td>Инкубационный отсек</td><td>-14% падения настроения в отсеке</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Инкубационный отсек</td><td>-18% падения настроения в отсеке</td></tr>
+          <tr><td>Акэкури</td><td>Производственный отсек</td><td>-10% падения настроения в отсеке</td><td>Приемная</td><td>-14% падения настроения в отсеке</td><td>Производственный отсек</td><td>-14% падения настроения в отсеке</td><td>Приемная</td><td>-18% падения настроения в отсеке</td></tr>
+          <tr><td>Да Пан</td><td>Инкубационный отсек</td><td>+10% скорости роста грибов</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Инкубационный отсек</td><td>+20% скорости роста грибов</td><td>Контрольный нексус</td><td>+16% подъем настроения всех</td></tr>
+          <tr><td>Ивонна</td><td>Инкубационный отсек</td><td>+20% скорости роста грибов</td><td>Инкубационный отсек</td><td>-14% падения настроения в отсеке</td><td>Инкубационный отсек</td><td>+30% скорости роста грибов</td><td>Инкубационный отсек</td><td>-18% падения настроения в отсеке</td></tr>
+          <tr><td>Лэватейн</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оперативника</td><td>Производственный отсек</td><td>-14% падения настроения в отсеке</td><td>Производственный отсек</td><td>+30% эфф. производства опыта оперативника</td><td>Производственный отсек</td><td>-18% падения настроения в отсеке</td></tr>
+          <tr><td>Светоснежка</td><td>Производственный отсек</td><td>-10% падения настроения в отсеке</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Производственный отсек</td><td>-14% падения настроения в отсеке</td><td>Контрольный нексус</td><td>+16% подъем настроения всех</td></tr>
+          <tr><td>Гилберта</td><td>Производственный отсек</td><td>-14% падения настроения в отсеке</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оружия</td><td>Производственный отсек</td><td>-18% падения настроения в отсеке</td><td>Производственный отсек</td><td>+30% эфф. производства опыта оружия</td></tr>
+          <tr><td>Сайхи</td><td>Производственный отсек</td><td>+10% эфф. производства опыта оперативника</td><td>Приемная</td><td>Ув. шанса на зацепку 5</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оперативника</td><td>Приемная</td><td>Ув. шанса на зацепку 5</td></tr>
+          <tr><td>Чэнь Цяньюй</td><td>Производственный отсек</td><td>+10% эфф. производства опыта оружия</td><td>Инкубационный отсек</td><td>+20% скорости роста редких минералов</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оружия</td><td>Инкубационный отсек</td><td>+30% скорости роста редких минералов</td></tr>
+          <tr><td>Перлика</td><td>Контрольный нексус</td><td>+8% подъем настроения всех</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оружия</td><td>Контрольный нексус</td><td>+12% подъем настроения всех</td><td>Производственный отсек</td><td>+30% эфф. производства опыта оружия</td></tr>
+          <tr><td>Эмбер</td><td>Производственный отсек</td><td>+20% эфф. производства опыта оперативника</td><td>Приемная</td><td>Ув. шанса на зацепку 4</td><td>Производственный отсек</td><td>+30% эфф. производства опыта оперативника</td><td>Приемная</td><td>Ув. шанса на зацепку 4</td></tr>
+          <tr><td>Панихида</td><td>Инкубационный отсек</td><td>+20% эфф. роса кристаллизованных растений</td><td>Приемная</td><td>Ув. шанса на зацепку 7</td><td>Инкубационный отсек</td><td>+30% эфф. роса кристаллизованных растений</td><td>Приемная</td><td>Ув. шанса на зацепку 7</td></tr>
+          <tr><td colspan="9" style="background:#fef7e0;">Эндминестратор — нельзя установить координатором на аванпост</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="mode-omk-pick" class="mode">
+    <h2>Подбор оперативников ОМК «ДИЦЗЯН»</h2>
+    <p class="subtitle">Выберите 3-х оперативников в каждый отсек и уровень (Э1–Э4).</p>
+    <div id="omkPickCompartments"></div>
+  </div>
+
+  <div id="mode-essence-ref" class="mode">
+    <h2>Снаряжение и эссенции</h2>
+    <p class="subtitle">Шесть справочных таблиц: полный список и эссенции по локациям (Наименование, Показатели: Основные, Побочные, Навыки).</p>
+    <div class="sheet-wrap">
+      <div class="essence-ref-section">
+        <div class="essence-ref-title">Оружие</div>
+        <table class="outpost-table">
+          <thead>
+            <tr><th>Наименование</th><th colspan="3" class="col-span">Показатели</th></tr>
+            <tr class="sub"><th></th><th>Основные</th><th>Побочные</th><th>Навыки</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Артист Тиранический</td><td>Интеллект</td><td>Шанс крита</td><td>Разрыв</td></tr>
+            <tr><td>Безупречная репутация</td><td>Осн. Показатель</td><td>Физа</td><td>Жестокость</td></tr>
+            <tr><td>Былой шик</td><td>Воля</td><td>ОЗ</td><td>Эффективность</td></tr>
+            <tr><td>Великое видение</td><td>Ловкость</td><td>Атака</td><td>Поражение</td></tr>
+            <tr><td>Водоплаволов 3.0</td><td>Сила</td><td>Крио</td><td>Подавление</td></tr>
+            <tr><td>Гарантированная доставка</td><td>Воля</td><td>Накопление СЭ</td><td>Азарт</td></tr>
+            <tr><td>Гнев кузни</td><td>Интеллект</td><td>Атака</td><td>Сумерки</td></tr>
+            <tr><td>Громберг</td><td>Сила</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Доблесть</td><td>Ловкость</td><td>Физа</td><td>Драчливость</td></tr>
+            <tr><td>Двенадцать вопросов</td><td>Ловкость</td><td>Атака</td><td>Поражение</td></tr>
+            <tr><td>Дикий странник</td><td>Интеллект</td><td>Электро</td><td>Поражение</td></tr>
+            <tr><td>Древний канал</td><td>Сила</td><td>Сила искусств</td><td>Жестокость</td></tr>
+            <tr><td>Забвение</td><td>Интеллект</td><td>Урон искусств</td><td>Сумерки</td></tr>
+            <tr><td>Звезда белых ночей</td><td>Осн. Показатель</td><td>Сила искусств</td><td>Поражение</td></tr>
+            <tr><td>Искатель темного луна</td><td>Сила</td><td>Накопление СЭ</td><td>Детонация</td></tr>
+            <tr><td>Кланнибал</td><td>Осн. Показатель</td><td>Урон искусств</td><td>Поражение</td></tr>
+            <tr><td>Клин</td><td>Осн. Показатель</td><td>Шанс крита</td><td>Поражение</td></tr>
+            <tr><td>Мечта о звездном береге</td><td>Интеллект</td><td>Эфф. лечения</td><td>Поражение</td></tr>
+            <tr><td>Модуль взрыва</td><td>Осн. Показатель</td><td>Сила искусств</td><td>Детонация</td></tr>
+            <tr><td>Монаихэ</td><td>Воля</td><td>Накопление СЭ</td><td>Муза</td></tr>
+            <tr><td>Навигатор</td><td>Интеллект</td><td>Крио</td><td>Поражение</td></tr>
+            <tr><td>Неустанность</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Ночной факел</td><td>Интеллект</td><td>Тепло</td><td>Поражение</td></tr>
+            <tr><td>Опус Травления</td><td>Воля</td><td>Природа</td><td>Подавление</td></tr>
+            <tr><td>Опус живого</td><td>Ловкость</td><td>Урон искусств</td><td>Поражение</td></tr>
+            <tr><td>Прочное притяжение</td><td>Воля</td><td>Электро</td><td>Подавление</td></tr>
+            <tr><td>Прощальный обет</td><td>Сила</td><td>Тепло</td><td>Азарт</td></tr>
+            <tr><td>Реактивная Пика</td><td>Осн. Показатель</td><td>Атака</td><td>Подавление</td></tr>
+            <tr><td>Резкий подъем</td><td>Осн. Показатель</td><td>Шанс крита</td><td>Сумерки</td></tr>
+            <tr><td>Растерзанный принц</td><td>Сила</td><td>Шанс крита</td><td>Разрушение</td></tr>
+            <tr><td>Рыцарская добродетель</td><td>Воля</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Свободное служение</td><td>Воля</td><td>Эфф. лечения</td><td>Лечение</td></tr>
+            <tr><td>Скала</td><td>Интеллект</td><td>Накопление СЭ</td><td>Муза</td></tr>
+            <tr><td>Стальной раскол</td><td>Ловкость</td><td>Физа</td><td>Драчливость</td></tr>
+            <tr><td>Станс памяти</td><td>Интеллект</td><td>Атака</td><td>Сумерки</td></tr>
+            <tr><td>Термитный резак</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Устремление</td><td>Ловкость</td><td>Физа</td><td>Сумерки</td></tr>
+            <tr><td>Финальный вызов</td><td>Сила</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Хравенгер</td><td>Сила</td><td>Атака</td><td>Детонация</td></tr>
+            <tr><td>Хранитель Горы</td><td>Ловкость</td><td>Физа</td><td>Эффективность</td></tr>
+            <tr><td>Химера правосудия</td><td>Сила</td><td>Накопление СЭ</td><td>Жестокость</td></tr>
+            <tr><td>Эталон</td><td>Осн. Показатель</td><td>Атака</td><td>Подавление</td></tr>
+            <tr><td>ОВЈ Идентификатор искусств</td><td>Интеллект</td><td>Сила искусств</td><td>Азарт</td></tr>
+            <tr><td>ОВЈ Клинок света</td><td>Ловкость</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>ОВЈ Прыть</td><td>Ловкость</td><td>Накопление СЭ</td><td>Детонация</td></tr>
+            <tr><td>ОВЈ Рог-бритва</td><td>Воля</td><td>Физа</td><td>Поражение</td></tr>
+            <tr><td>ОВЈ Тяжелое бремя</td><td>Сила</td><td>ОЗ</td><td>Эффективность</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="essence-ref-section">
+        <div class="essence-ref-title">Центр</div>
+        <table class="outpost-table">
+          <thead>
+            <tr><th>Наименование</th><th colspan="3" class="col-span">Показатели</th></tr>
+            <tr class="sub"><th></th><th>Основные</th><th>Побочные</th><th>Навыки</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Гарантированная доставка</td><td>Воля</td><td>Накопление СЭ</td><td>Азарт</td></tr>
+            <tr><td>Модуль взрыва</td><td>Осн. Показатель</td><td>Сила искусств</td><td>Детонация</td></tr>
+            <tr><td>Неустанность</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Опус Травления</td><td>Воля</td><td>Природа</td><td>Подавление</td></tr>
+            <tr><td>Реактивная Пика</td><td>Осн. Показатель</td><td>Атака</td><td>Подавление</td></tr>
+            <tr><td>Термитный резак</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Хравенгер</td><td>Сила</td><td>Атака</td><td>Детонация</td></tr>
+            <tr><td>Эталон</td><td>Осн. Показатель</td><td>Атака</td><td>Подавление</td></tr>
+            <tr><td>Водоплаволов 3.0</td><td>Сила</td><td>Крио</td><td>Подавление</td></tr>
+            <tr><td>Искатель темного луна</td><td>Сила</td><td>Накопление СЭ</td><td>Детонация</td></tr>
+            <tr><td>Прочное притяжение</td><td>Воля</td><td>Электро</td><td>Подавление</td></tr>
+            <tr><td>Прощальный обет</td><td>Сила</td><td>Тепло</td><td>Азарт</td></tr>
+            <tr><td>ОВЈ Идентификатор искусств</td><td>Интеллект</td><td>Сила искусств</td><td>Азарт</td></tr>
+            <tr><td>ОВЈ Клинок света</td><td>Ловкость</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>ОВЈ Прыть</td><td>Ловкость</td><td>Накопление СЭ</td><td>Детонация</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="essence-ref-section">
+        <div class="essence-ref-title">Первое месторождение</div>
+        <table class="outpost-table">
+          <thead>
+            <tr><th>Наименование</th><th colspan="3" class="col-span">Показатели</th></tr>
+            <tr class="sub"><th></th><th>Основные</th><th>Побочные</th><th>Навыки</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Безупречная репутация</td><td>Осн. Показатель</td><td>Физа</td><td>Жестокость</td></tr>
+            <tr><td>Былой шик</td><td>Воля</td><td>ОЗ</td><td>Эффективность</td></tr>
+            <tr><td>Доблесть</td><td>Ловкость</td><td>Физа</td><td>Драчливость</td></tr>
+            <tr><td>Звезда белых ночей</td><td>Осн. Показатель</td><td>Сила искусств</td><td>Поражение</td></tr>
+            <tr><td>Клин</td><td>Осн. Показатель</td><td>Шанс крита</td><td>Поражение</td></tr>
+            <tr><td>Мечта о звездном береге</td><td>Интеллект</td><td>Эфф. лечения</td><td>Поражение</td></tr>
+            <tr><td>Модуль взрыва</td><td>Осн. Показатель</td><td>Сила искусств</td><td>Детонация</td></tr>
+            <tr><td>Навигатор</td><td>Интеллект</td><td>Крио</td><td>Поражение</td></tr>
+            <tr><td>Ночной факел</td><td>Интеллект</td><td>Тепло</td><td>Поражение</td></tr>
+            <tr><td>Опус Травления</td><td>Воля</td><td>Природа</td><td>Подавление</td></tr>
+            <tr><td>Резкий подъем</td><td>Осн. Показатель</td><td>Шанс крита</td><td>Сумерки</td></tr>
+            <tr><td>Хранитель Горы</td><td>Ловкость</td><td>Физа</td><td>Эффективность</td></tr>
+            <tr><td>Водоплаволов 3.0</td><td>Сила</td><td>Крио</td><td>Подавление</td></tr>
+            <tr><td>Древний канал</td><td>Сила</td><td>Сила искусств</td><td>Жестокость</td></tr>
+            <tr><td>Стальной раскол</td><td>Ловкость</td><td>Физа</td><td>Драчливость</td></tr>
+            <tr><td>Устремление</td><td>Ловкость</td><td>Физа</td><td>Сумерки</td></tr>
+            <tr><td>ОВЈ Тяжелое бремя</td><td>Сила</td><td>ОЗ</td><td>Эффективность</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="essence-ref-section">
+        <div class="essence-ref-title">Улин</div>
+        <table class="outpost-table">
+          <thead>
+            <tr><th>Наименование</th><th colspan="3" class="col-span">Показатели</th></tr>
+            <tr class="sub"><th></th><th>Основные</th><th>Побочные</th><th>Навыки</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Артист Тиранический</td><td>Интеллект</td><td>Шанс крита</td><td>Разрыв</td></tr>
+            <tr><td>Гнев кузни</td><td>Интеллект</td><td>Атака</td><td>Сумерки</td></tr>
+            <tr><td>Громберг</td><td>Сила</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Забвение</td><td>Интеллект</td><td>Урон искусств</td><td>Сумерки</td></tr>
+            <tr><td>Неустанность</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Растерзанный принц</td><td>Сила</td><td>Шанс крита</td><td>Разрушение</td></tr>
+            <tr><td>Резкий подъем</td><td>Осн. Показатель</td><td>Шанс крита</td><td>Сумерки</td></tr>
+            <tr><td>Рыцарская добродетель</td><td>Воля</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Термитный резак</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Хравенгер</td><td>Сила</td><td>Атака</td><td>Детонация</td></tr>
+            <tr><td>Искатель темного луна</td><td>Сила</td><td>Накопление СЭ</td><td>Детонация</td></tr>
+            <tr><td>Свободное служение</td><td>Воля</td><td>Эфф. лечения</td><td>Лечение</td></tr>
+            <tr><td>Станс памяти</td><td>Интеллект</td><td>Атака</td><td>Сумерки</td></tr>
+            <tr><td>Финальный вызов</td><td>Сила</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Химера правосудия</td><td>Сила</td><td>Накопление СЭ</td><td>Жестокость</td></tr>
+            <tr><td>ОВЈ Клинок света</td><td>Ловкость</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>ОВЈ Прыть</td><td>Ловкость</td><td>Накопление СЭ</td><td>Детонация</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="essence-ref-section">
+        <div class="essence-ref-title">Центр исследования ориджиния</div>
+        <table class="outpost-table">
+          <thead>
+            <tr><th>Наименование</th><th colspan="3" class="col-span">Показатели</th></tr>
+            <tr class="sub"><th></th><th>Основные</th><th>Побочные</th><th>Навыки</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Артист Тиранический</td><td>Интеллект</td><td>Шанс крита</td><td>Разрыв</td></tr>
+            <tr><td>Великое видение</td><td>Ловкость</td><td>Атака</td><td>Поражение</td></tr>
+            <tr><td>Гарантированная доставка</td><td>Воля</td><td>Накопление СЭ</td><td>Азарт</td></tr>
+            <tr><td>Доблесть</td><td>Ловкость</td><td>Физа</td><td>Драчливость</td></tr>
+            <tr><td>Кланнибал</td><td>Осн. Показатель</td><td>Урон искусств</td><td>Поражение</td></tr>
+            <tr><td>Клин</td><td>Осн. Показатель</td><td>Шанс крита</td><td>Поражение</td></tr>
+            <tr><td>Навигатор</td><td>Интеллект</td><td>Крио</td><td>Поражение</td></tr>
+            <tr><td>Опус Травления</td><td>Воля</td><td>Природа</td><td>Подавление</td></tr>
+            <tr><td>Реактивная Пика</td><td>Осн. Показатель</td><td>Атака</td><td>Подавление</td></tr>
+            <tr><td>Хранитель Горы</td><td>Ловкость</td><td>Физа</td><td>Эффективность</td></tr>
+            <tr><td>Эталон</td><td>Осн. Показатель</td><td>Атака</td><td>Подавление</td></tr>
+            <tr><td>Водоплаволов 3.0</td><td>Сила</td><td>Крио</td><td>Подавление</td></tr>
+            <tr><td>Двенадцать вопросов</td><td>Ловкость</td><td>Атака</td><td>Поражение</td></tr>
+            <tr><td>Дикий странник</td><td>Интеллект</td><td>Электро</td><td>Поражение</td></tr>
+            <tr><td>Монаихэ</td><td>Воля</td><td>Накопление СЭ</td><td>Муза</td></tr>
+            <tr><td>Опус живого</td><td>Ловкость</td><td>Урон искусств</td><td>Поражение</td></tr>
+            <tr><td>Прочное притяжение</td><td>Воля</td><td>Электро</td><td>Подавление</td></tr>
+            <tr><td>Скала</td><td>Интеллект</td><td>Накопление СЭ</td><td>Муза</td></tr>
+            <tr><td>Стальной раскол</td><td>Ловкость</td><td>Физа</td><td>Драчливость</td></tr>
+            <tr><td>ОВЈ Рог-бритва</td><td>Воля</td><td>Физа</td><td>Поражение</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="essence-ref-section">
+        <div class="essence-ref-title">плато Энергии</div>
+        <table class="outpost-table">
+          <thead>
+            <tr><th>Наименование</th><th colspan="3" class="col-span">Показатели</th></tr>
+            <tr class="sub"><th></th><th>Основные</th><th>Побочные</th><th>Навыки</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Артист Тиранический</td><td>Интеллект</td><td>Шанс крита</td><td>Разрыв</td></tr>
+            <tr><td>Безупречная репутация</td><td>Осн. Показатель</td><td>Физа</td><td>Жестокость</td></tr>
+            <tr><td>Великое видение</td><td>Ловкость</td><td>Атака</td><td>Поражение</td></tr>
+            <tr><td>Громберг</td><td>Сила</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Звезда белых ночей</td><td>Осн. Показатель</td><td>Сила искусств</td><td>Поражение</td></tr>
+            <tr><td>Клин</td><td>Осн. Показатель</td><td>Шанс крита</td><td>Поражение</td></tr>
+            <tr><td>Мечта о звездном береге</td><td>Интеллект</td><td>Эфф. лечения</td><td>Поражение</td></tr>
+            <tr><td>Неустанность</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Ночной факел</td><td>Интеллект</td><td>Тепло</td><td>Поражение</td></tr>
+            <tr><td>Растерзанный принц</td><td>Сила</td><td>Шанс крита</td><td>Разрушение</td></tr>
+            <tr><td>Рыцарская добродетель</td><td>Воля</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>Термитный резак</td><td>Воля</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>Двенадцать вопросов</td><td>Ловкость</td><td>Атака</td><td>Поражение</td></tr>
+            <tr><td>Древний канал</td><td>Сила</td><td>Сила искусств</td><td>Жестокость</td></tr>
+            <tr><td>Прощальный обет</td><td>Сила</td><td>Тепло</td><td>Азарт</td></tr>
+            <tr><td>Свободное служение</td><td>Воля</td><td>Эфф. лечения</td><td>Лечение</td></tr>
+            <tr><td>Финальный вызов</td><td>Сила</td><td>ОЗ</td><td>Лечение</td></tr>
+            <tr><td>ОВЈ Идентификатор искусств</td><td>Интеллект</td><td>Сила искусств</td><td>Азарт</td></tr>
+            <tr><td>ОВЈ Клинок света</td><td>Ловкость</td><td>Атака</td><td>Поток</td></tr>
+            <tr><td>ОВЈ Рог-бритва</td><td>Воля</td><td>Физа</td><td>Поражение</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="mode-essence" class="mode active">
     <div id="essenceStep1" class="step active">
       <h2>Выберите оружие</h2>
       <p class="subtitle">Показаны эссенции с совпадением 3 из 3 и 2 из 3 показателей и места, где они падают.</p>
@@ -106,6 +585,37 @@
 (function() {
   var DATA = {"Вечный ксиранит":{"Манипулятор":{"Воля":["Печать защитника К1","Щитовой инъектор \"Рысь\""],"Интеллект":["Пример: Книга мудреца","Пример: Амулет знаний"],"Скорость накопления суперэнергии":["Пример: Кристалл ускорения","Пример: Резонатор"]},"Энергетическое ядро":{"Воля":["Ядро Воля-1","Ядро Воля-2"],"Интеллект":["Печать защитника","Пирометр \"Термоудар\"","Калибратор \"Импульс\""],"Сила":["Жетон защитника","Кислородная трубка \"Висячая река\"","Радар \"Инлун-50\"","Повязка охраны \"Мьешко\"","Аккумулятор \"Термоудар\"","Рация \"Колонист\" К1","Рация \"Колонист\"","Аналитический браслет \"Эфиртех\"","Коннектор \"Рысь\" К1","Коннектор \"Рысь\""],"Скорость накопления суперэнергии":["Печать защитника"]},"Энергетическое ядро К1":{"Интеллект":["Печать защитника","Пирометр \"Термоудар\"","Калибратор \"Импульс\""],"Воля":["Печать защитника К1","Манипулятор \"Вечный ксиранит\"","Нож \"Инлун-50\"","Тычковый нож охраны \"Мьешко\" К1","Тычковый нож охраны \"Мьешко\"","Картридж энергии \"Термоудар\"","Костоломская фигурка К1","Костоломская фигурка","Щитовой инъектор \"Рысь\"","Пластина \"Рысь\""],"Бонус лечения":["Щитовой инъектор \"Рысь\""]},"Перчатки":{},"Перчатки К1":{},"Броня":{}},"Натиск прилива":{},"Инлун-50":{},"Охраны \"Мьешко\"":{},"Термоудар":{},"Колонист":{},"Импульс":{},"Игра в костолома":{},"Эфиртех":{},"Рысь":{},"Мастер меча":{}};
   var WEAPONS = [{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Безупречная репутация","main":"Осн. Показатель","secondary":"Физа","skill":"Жестокость"},{"name":"Былой шик","main":"Воля","secondary":"ОЗ","skill":"Эффективность"},{"name":"Великое видение","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Водоплаволов 3.0","main":"Сила","secondary":"Крио","skill":"Подавление"},{"name":"Гарантированная доставка","main":"Воля","secondary":"Накопление СЭ","skill":"Азарт"},{"name":"Гнев кузни","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Громберг","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Доблесть","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Двенадцать вопросов","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Дикий странник","main":"Интеллект","secondary":"Электро","skill":"Поражение"},{"name":"Древний канал","main":"Сила","secondary":"Сила искусств","skill":"Жестокость"},{"name":"Забвение","main":"Интеллект","secondary":"Урон искусств","skill":"Сумерки"},{"name":"Звезда белых ночей","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Поражение"},{"name":"Искатель темного луна","main":"Сила","secondary":"Накопление СЭ","skill":"Детонация"},{"name":"Кланнибал","main":"Осн. Показатель","secondary":"Урон искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Мечта о звездном береге","main":"Интеллект","secondary":"Эфф. лечения","skill":"Поражение"},{"name":"Модуль взрыва","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Детонация"},{"name":"Монаихэ","main":"Воля","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Навигатор","main":"Интеллект","secondary":"Крио","skill":"Поражение"},{"name":"Неустанность","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Ночной факел","main":"Интеллект","secondary":"Тепло","skill":"Поражение"},{"name":"Опус Травления","main":"Воля","secondary":"Природа","skill":"Подавление"},{"name":"Опус живого","main":"Ловкость","secondary":"Урон искусств","skill":"Поражение"},{"name":"Прочное притяжение","main":"Воля","secondary":"Электро","skill":"Подавление"},{"name":"Прощальный обет","main":"Сила","secondary":"Тепло","skill":"Азарт"},{"name":"Реактивная Пика","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"Резкий подъем","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Сумерки"},{"name":"Растерзанный принц","main":"Сила","secondary":"Шанс крита","skill":"Разрушение"},{"name":"Рыцарская добродетель","main":"Воля","secondary":"ОЗ","skill":"Лечение"},{"name":"Свободное служение","main":"Воля","secondary":"Эфф. лечения","skill":"Лечение"},{"name":"Скала","main":"Интеллект","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Стальной раскол","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Станс памяти","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Термитный резак","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Устремление","main":"Ловкость","secondary":"Физа","skill":"Сумерки"},{"name":"Финальный вызов","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Хравенгер","main":"Сила","secondary":"Атака","skill":"Детонация"},{"name":"Хранитель Горы","main":"Ловкость","secondary":"Физа","skill":"Эффективность"},{"name":"Химера правосудия","main":"Сила","secondary":"Накопление СЭ","skill":"Жестокость"},{"name":"Эталон","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"ОВЈ Идентификатор искусств","main":"Интеллект","secondary":"Сила искусств","skill":"Азарт"},{"name":"ОВЈ Клинок света","main":"Ловкость","secondary":"Атака","skill":"Поток"},{"name":"ОВЈ Прыть","main":"Ловкость","secondary":"Накопление СЭ","skill":"Детонация"},{"name":"ОВЈ Рог-бритва","main":"Воля","secondary":"Физа","skill":"Поражение"},{"name":"ОВЈ Тяжелое бремя","main":"Сила","secondary":"ОЗ","skill":"Эффективность"}];
+  var OMK_COMPARTMENTS = ["Контрольный нексус","Приемная","Производственный отсек 1","Производственный отсек 2","Инкубационный отсек"];
+  var OMK_OPERATORS = [
+    { name: "Лифэн", levels: [{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Приемная", b: "Ув. шанса на зацепку 3" },{ c: "Контрольный нексус", b: "+16% подъем настроения всех" },{ c: "Приемная", b: "Ув. шанса на зацепку 3" }]},
+    { name: "Вульфгард", levels: [{ c: "Производственный отсек 2", b: "+10% эфф. производства опыта оперативника" },{ c: "Инкубационный отсек", b: "+20% скорости роста редких минералов" },{ c: "Производственный отсек 2", b: "+20% эфф. производства опыта оперативника" },{ c: "Инкубационный отсек", b: "+30% скорости роста редких минералов" }]},
+    { name: "Арделия", levels: [{ c: "Приемная", b: "+20% эфф. сбора зацепок" },{ c: "Приемная", b: "-14% падения настроения в отсеке" },{ c: "Приемная", b: "+30% эфф. сбора зацепок" },{ c: "Приемная", b: "-18% падения настроения в отсеке" }]},
+    { name: "Флюорит", levels: [{ c: "Инкубационный отсек", b: "+10% скорости роста редких минералов" },{ c: "Контрольный нексус", b: "+12% подъем настроения" },{ c: "Инкубационный отсек", b: "+20% скорости роста редких минералов" },{ c: "Контрольный нексус", b: "+16% подъем настроения" }]},
+    { name: "Авивенна", levels: [{ c: "Контрольный нексус", b: "+8% подъем настроения всех" },{ c: "Приемная", b: "Ув. шанса на зацепку 2" },{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Приемная", b: "Ув. шанса на зацепку 2" }]},
+    { name: "Арклайт", levels: [{ c: "Производственный отсек 1", b: "+10% эфф. производства опыта оружия" },{ c: "Приемная", b: "Ув. шанса на зацепку 6" },{ c: "Производственный отсек 1", b: "+20% эфф. производства опыта оружия" },{ c: "Приемная", b: "Ув. шанса на зацепку 6" }]},
+    { name: "Порганичник", levels: [{ c: "Производственный отсек 1", b: "+20% эфф. производства опыта оружия" },{ c: "Производственный отсек 1", b: "-14% падения настроения в отсеке" },{ c: "Производственный отсек 1", b: "+30% эфф. производства опыта оружия" },{ c: "Производственный отсек 1", b: "-18% падения настроения в отсеке" }]},
+    { name: "Алеш", levels: [{ c: "Контрольный нексус", b: "+8% подъем настроения всех" },{ c: "Приемная", b: "Ув. шанса на зацепку 1" },{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Приемная", b: "Ув. шанса на зацепку 1" }]},
+    { name: "Антал", levels: [{ c: "Производственный отсек 1", b: "+10% эфф. производства опыта оружия" },{ c: "Инкубационный отсек", b: "-14% падения настроения в отсеке" },{ c: "Производственный отсек 1", b: "+20% эфф. производства опыта оружия" },{ c: "Инкубационный отсек", b: "—" }]},
+    { name: "Эстелла", levels: [{ c: "Контрольный нексус", b: "+8% подъем настроения всех" },{ c: "Приемная", b: "+20% эфф. сбора зацепок" },{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Приемная", b: "+30% эфф. сбора зацепок" }]},
+    { name: "Кэтчер", levels: [{ c: "Контрольный нексус", b: "+8% подъем настроения всех" },{ c: "Инкубационный отсек", b: "-14% падения настроения в отсеке" },{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Инкубационный отсек", b: "-18% падения настроения в отсеке" }]},
+    { name: "Акэкури", levels: [{ c: "Производственный отсек 1", b: "-10% падения настроения в отсеке" },{ c: "Приемная", b: "-14% падения настроения в отсеке" },{ c: "Производственный отсек 1", b: "-14% падения настроения в отсеке" },{ c: "Приемная", b: "-18% падения настроения в отсеке" }]},
+    { name: "Да Пан", levels: [{ c: "Инкубационный отсек", b: "+10% скорости роста грибов" },{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Инкубационный отсек", b: "+20% скорости роста грибов" },{ c: "Контрольный нексус", b: "+16% подъем настроения всех" }]},
+    { name: "Ивонна", levels: [{ c: "Инкубационный отсек", b: "+20% скорости роста грибов" },{ c: "Инкубационный отсек", b: "-14% падения настроения в отсеке" },{ c: "Инкубационный отсек", b: "+30% скорости роста грибов" },{ c: "Инкубационный отсек", b: "-18% падения настроения в отсеке" }]},
+    { name: "Лэватейн", levels: [{ c: "Производственный отсек 2", b: "+20% эфф. производства опыта оперативника" },{ c: "Производственный отсек 2", b: "-14% падения настроения в отсеке" },{ c: "Производственный отсек 2", b: "+30% эфф. производства опыта оперативника" },{ c: "Производственный отсек 2", b: "-18% падения настроения в отсеке" }]},
+    { name: "Светоснежка", levels: [{ c: "Производственный отсек 1", b: "-10% падения настроения в отсеке" },{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Производственный отсек 1", b: "-14% падения настроения в отсеке" },{ c: "Контрольный нексус", b: "+16% подъем настроения всех" }]},
+    { name: "Гилберта", levels: [{ c: "Производственный отсек 1", b: "-14% падения настроения в отсеке" },{ c: "Производственный отсек 1", b: "+20% эфф. производства опыта оружия" },{ c: "Производственный отсек 1", b: "-18% падения настроения в отсеке" },{ c: "Производственный отсек 1", b: "+30% эфф. производства опыта оружия" }]},
+    { name: "Сайхи", levels: [{ c: "Производственный отсек 2", b: "+10% эфф. производства опыта оперативника" },{ c: "Приемная", b: "Ув. шанса на зацепку 5" },{ c: "Производственный отсек 2", b: "+20% эфф. производства опыта оперативника" },{ c: "Приемная", b: "Ув. шанса на зацепку 5" }]},
+    { name: "Чэнь Цяньюй", levels: [{ c: "Производственный отсек 1", b: "+10% эфф. производства опыта оружия" },{ c: "Инкубационный отсек", b: "+20% скорости роста редких минералов" },{ c: "Производственный отсек 1", b: "+20% эфф. производства опыта оружия" },{ c: "Инкубационный отсек", b: "+30% скорости роста редких минералов" }]},
+    { name: "Перлика", levels: [{ c: "Контрольный нексус", b: "+8% подъем настроения всех" },{ c: "Производственный отсек 1", b: "+20% эфф. производства опыта оружия" },{ c: "Контрольный нексус", b: "+12% подъем настроения всех" },{ c: "Производственный отсек 1", b: "+30% эфф. производства опыта оружия" }]},
+    { name: "Эмбер", levels: [{ c: "Производственный отсек 2", b: "+20% эфф. производства опыта оперативника" },{ c: "Приемная", b: "Ув. шанса на зацепку 4" },{ c: "Производственный отсек 2", b: "+30% эфф. производства опыта оперативника" },{ c: "Приемная", b: "Ув. шанса на зацепку 4" }]},
+    { name: "Панихида", levels: [{ c: "Инкубационный отсек", b: "+20% эфф. роса кристаллизованных растений" },{ c: "Приемная", b: "Ув. шанса на зацепку 7" },{ c: "Инкубационный отсек", b: "+30% эфф. роса кристаллизованных растений" },{ c: "Приемная", b: "Ув. шанса на зацепку 7" }]}
+  ];
+  var OMK_BEST = { "Контрольный нексус": ["Лифэн","Флюорит","Да Пан"], "Приемная": ["Арделия","Эстелла","Акэкури"], "Производственный отсек 1": ["Порганичник","Гилберта","Перлика"], "Производственный отсек 2": ["Лэватейн","Сайхи","Эмбер"], "Инкубационный отсек": ["Чэнь Цяньюй","Вульфгард","Панихида"] };
+  function omkPickHasBonusInComp(opName, compId){
+    var op = OMK_OPERATORS.find(function(o){ return o.name === opName; });
+    return op && op.levels.some(function(l){ return l.c === compId && l.b && l.b !== "—"; });
+  }
+  function omkPickIsBestInComp(opName, compId){ return OMK_BEST[compId] && OMK_BEST[compId].indexOf(opName) >= 0; }
   var ESSENCE_LOCATIONS = [{"locationName":"Первое месторождение","essences":[{"name":"Безупречная репутация","main":"Осн. Показатель","secondary":"Физа","skill":"Жестокость"},{"name":"Былой шик","main":"Воля","secondary":"ОЗ","skill":"Эффективность"},{"name":"Доблесть","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Звезда белых ночей","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Мечта о звездном береге","main":"Интеллект","secondary":"Эфф. лечения","skill":"Поражение"},{"name":"Модуль взрыва","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Детонация"},{"name":"Навигатор","main":"Интеллект","secondary":"Крио","skill":"Поражение"},{"name":"Ночной факел","main":"Интеллект","secondary":"Тепло","skill":"Поражение"},{"name":"Опус Травления","main":"Воля","secondary":"Природа","skill":"Подавление"},{"name":"Резкий подъем","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Сумерки"},{"name":"Хранитель Горы","main":"Ловкость","secondary":"Физа","skill":"Эффективность"},{"name":"Водоплаволов 3.0","main":"Сила","secondary":"Крио","skill":"Подавление"},{"name":"Древний канал","main":"Сила","secondary":"Сила искусств","skill":"Жестокость"},{"name":"Стальной раскол","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Устремление","main":"Ловкость","secondary":"Физа","skill":"Сумерки"},{"name":"ОВЈ Тяжелое бремя","main":"Сила","secondary":"ОЗ","skill":"Эффективность"}]},{"locationName":"Плато Энергии","essences":[{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Безупречная репутация","main":"Осн. Показатель","secondary":"Физа","skill":"Жестокость"},{"name":"Великое видение","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Громберг","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Звезда белых ночей","main":"Осн. Показатель","secondary":"Сила искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Мечта о звездном береге","main":"Интеллект","secondary":"Эфф. лечения","skill":"Поражение"},{"name":"Неустанность","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Ночной факел","main":"Интеллект","secondary":"Тепло","skill":"Поражение"},{"name":"Растерзанный принц","main":"Сила","secondary":"Шанс крита","skill":"Разрушение"},{"name":"Рыцарская добродетель","main":"Воля","secondary":"ОЗ","skill":"Лечение"},{"name":"Термитный резак","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Двенадцать вопросов","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Древний канал","main":"Сила","secondary":"Сила искусств","skill":"Жестокость"},{"name":"Прощальный обет","main":"Сила","secondary":"Тепло","skill":"Азарт"},{"name":"Свободное служение","main":"Воля","secondary":"Эфф. лечения","skill":"Лечение"},{"name":"Финальный вызов","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"ОВЈ Идентификатор искусств","main":"Интеллект","secondary":"Сила искусств","skill":"Азарт"},{"name":"ОВЈ Клинок света","main":"Ловкость","secondary":"Атака","skill":"Поток"},{"name":"ОВЈ Рог-бритва","main":"Воля","secondary":"Физа","skill":"Поражение"}]},{"locationName":"Улин","essences":[{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Гнев кузни","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Громберг","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Забвение","main":"Интеллект","secondary":"Урон искусств","skill":"Сумерки"},{"name":"Неустанность","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Растерзанный принц","main":"Сила","secondary":"Шанс крита","skill":"Разрушение"},{"name":"Резкий подъем","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Сумерки"},{"name":"Рыцарская добродетель","main":"Воля","secondary":"ОЗ","skill":"Лечение"},{"name":"Термитный резак","main":"Воля","secondary":"Атака","skill":"Поток"},{"name":"Хравенгер","main":"Сила","secondary":"Атака","skill":"Детонация"},{"name":"Искатель темного луна","main":"Сила","secondary":"Накопление СЭ","skill":"Детонация"},{"name":"Свободное служение","main":"Воля","secondary":"Эфф. лечения","skill":"Лечение"},{"name":"Станс памяти","main":"Интеллект","secondary":"Атака","skill":"Сумерки"},{"name":"Финальный вызов","main":"Сила","secondary":"ОЗ","skill":"Лечение"},{"name":"Химера правосудия","main":"Сила","secondary":"Накопление СЭ","skill":"Жестокость"},{"name":"ОВЈ Клинок света","main":"Ловкость","secondary":"Атака","skill":"Поток"},{"name":"ОВЈ Прыть","main":"Ловкость","secondary":"Накопление СЭ","skill":"Детонация"}]},{"locationName":"Центр исследования ориджиния","essences":[{"name":"Артист Тиранический","main":"Интеллект","secondary":"Шанс крита","skill":"Разрыв"},{"name":"Великое видение","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Гарантированная доставка","main":"Воля","secondary":"Накопление СЭ","skill":"Азарт"},{"name":"Доблесть","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"Кланнибал","main":"Осн. Показатель","secondary":"Урон искусств","skill":"Поражение"},{"name":"Клин","main":"Осн. Показатель","secondary":"Шанс крита","skill":"Поражение"},{"name":"Навигатор","main":"Интеллект","secondary":"Крио","skill":"Поражение"},{"name":"Опус Травления","main":"Воля","secondary":"Природа","skill":"Подавление"},{"name":"Реактивная Пика","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"Хранитель Горы","main":"Ловкость","secondary":"Физа","skill":"Эффективность"},{"name":"Эталон","main":"Осн. Показатель","secondary":"Атака","skill":"Подавление"},{"name":"Водоплаволов 3.0","main":"Сила","secondary":"Крио","skill":"Подавление"},{"name":"Двенадцать вопросов","main":"Ловкость","secondary":"Атака","skill":"Поражение"},{"name":"Дикий странник","main":"Интеллект","secondary":"Электро","skill":"Поражение"},{"name":"Монаихэ","main":"Воля","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Опус живого","main":"Ловкость","secondary":"Урон искусств","skill":"Поражение"},{"name":"Прочное притяжение","main":"Воля","secondary":"Электро","skill":"Подавление"},{"name":"Скала","main":"Интеллект","secondary":"Накопление СЭ","skill":"Муза"},{"name":"Стальной раскол","main":"Ловкость","secondary":"Физа","skill":"Драчливость"},{"name":"ОВЈ Рог-бритва","main":"Воля","secondary":"Физа","skill":"Поражение"}]}];
   function escapeHtml(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML;}
   document.querySelectorAll(".tab-btn").forEach(function(b){b.onclick=function(){var m=this.getAttribute("data-mode");document.querySelectorAll(".tab-btn").forEach(function(x){x.classList.remove("active");});document.querySelectorAll(".mode").forEach(function(x){x.classList.remove("active");});this.classList.add("active");document.getElementById("mode-"+m).classList.add("active");};});
@@ -123,8 +633,122 @@
   function essenceInit(){var list=document.getElementById("essenceWeaponList");list.innerHTML="";WEAPONS.forEach(function(w){var btn=document.createElement("button");btn.className="list-btn";btn.textContent=w.name;btn.onclick=function(){essenceSelectWeapon(w);};list.appendChild(btn);});document.getElementById("essenceStep1").classList.add("active");document.getElementById("essenceStep2").classList.remove("active");}
   function essenceSelectWeapon(weapon){var results={full:[],partial:[]},seen={};ESSENCE_LOCATIONS.forEach(function(loc){loc.essences.forEach(function(ess){var matched=countMatches(weapon,ess),key=loc.locationName+"|"+ess.name;if(seen[key])return;seen[key]=true;var entry={locationName:loc.locationName,essenceName:ess.name,matched:matched};if(matched.length===3)results.full.push(entry);else if(matched.length===2)results.partial.push(entry);});});document.getElementById("essenceWeaponStats").innerHTML="<span><strong>Основные:</strong> "+escapeHtml(weapon.main)+"</span><span><strong>Побочные:</strong> "+escapeHtml(weapon.secondary)+"</span><span><strong>Навыки:</strong> "+escapeHtml(weapon.skill)+"</span>";var listEl=document.getElementById("essenceResultsList");listEl.innerHTML="";if(results.full.length===0&&results.partial.length===0)listEl.innerHTML="<p style=\"color:#5f6368;padding:12px;\">Нет эссенций с совпадением 2 или 3 показателей.</p>";else{if(results.full.length>0){var b3=document.createElement("div");b3.innerHTML="<div class=\"block-title\">Совпадение 3 из 3</div>";results.full.forEach(function(e){var card=document.createElement("div");card.className="match-card three";card.innerHTML="<div class=\"essence-name\">"+escapeHtml(e.essenceName)+"</div><div class=\"where\"><strong>Место:</strong> "+escapeHtml(e.locationName)+"</div><div class=\"matched\">Совпадают: "+e.matched.join(", ")+"</div>";b3.appendChild(card);});listEl.appendChild(b3);}if(results.partial.length>0){var b2=document.createElement("div");b2.innerHTML="<div class=\"block-title\">Совпадение 2 из 3</div>";results.partial.forEach(function(e){var card=document.createElement("div");card.className="match-card two";card.innerHTML="<div class=\"essence-name\">"+escapeHtml(e.essenceName)+"</div><div class=\"where\"><strong>Место:</strong> "+escapeHtml(e.locationName)+"</div><div class=\"matched\">Совпадают: "+e.matched.join(", ")+"</div>";b2.appendChild(card);});listEl.appendChild(b2);}}document.getElementById("essenceStep1").classList.remove("active");document.getElementById("essenceStep2").classList.add("active");}
   function essenceGoBack(){document.getElementById("essenceStep2").classList.remove("active");document.getElementById("essenceStep1").classList.add("active");}
+  var omkPickState = [];
+  function omkPickGetUsedOperators(){
+    var used = {};
+    omkPickState.forEach(function(comp){
+      comp.forEach(function(slot){ if(slot.op) used[slot.op] = true; });
+    });
+    return used;
+  }
+  function omkPickBonusesFor(compId, opName, levelIdx){
+    var op = OMK_OPERATORS.find(function(o){ return o.name === opName; });
+    if(!op) return [];
+    var activeLevels = levelIdx === 0 ? [0] : levelIdx === 1 ? [0,1] : levelIdx === 2 ? [1,2] : [2,3];
+    var list = [];
+    activeLevels.forEach(function(idx){
+      if(op.levels[idx].c === compId && op.levels[idx].b && op.levels[idx].b !== "—") list.push(op.levels[idx].b);
+    });
+    return list;
+  }
+  function omkPickUpdate(){
+    var container = document.getElementById("omkPickCompartments");
+    var used = omkPickGetUsedOperators();
+    container.innerHTML = "";
+    OMK_COMPARTMENTS.forEach(function(compId, ci){
+      var compDiv = document.createElement("div");
+      compDiv.className = "omk-compartment";
+      var title = compId;
+      if(compId === "Производственный отсек 1") title = "Производственный отсек 1 (оружие)";
+      if(compId === "Производственный отсек 2") title = "Производственный отсек 2 (оперативники)";
+      compDiv.innerHTML = "<h3>" + escapeHtml(title) + "</h3>";
+      var bonuses = [];
+      for(var si = 0; si < 3; si++){
+        var slot = omkPickState[ci][si];
+        var row = document.createElement("div");
+        row.className = "omk-slot";
+        var selOp = document.createElement("select");
+        selOp.className = "omk-op";
+        selOp.dataset.comp = ci;
+        selOp.dataset.slot = si;
+        selOp.innerHTML = "<option value=\"\">— не выбран</option>";
+        var bestInComp = OMK_BEST[compId] || [];
+        var bestSet = {};
+        bestInComp.forEach(function(n){ bestSet[n] = true; });
+        var listBest = [], listBonus = [], listRest = [];
+        OMK_OPERATORS.forEach(function(o){
+          var hasBonus = omkPickHasBonusInComp(o.name, compId);
+          var isBest = omkPickIsBestInComp(o.name, compId);
+          if(isBest) listBest.push(o); else if(hasBonus) listBonus.push(o); else listRest.push(o);
+        });
+        function addOptgroup(label, cls, arr){
+          if(arr.length === 0) return;
+          var gr = document.createElement("optgroup");
+          gr.label = label;
+          if(cls) gr.className = cls;
+          arr.forEach(function(o){
+            var opt = document.createElement("option");
+            opt.value = o.name;
+            var prefix = omkPickIsBestInComp(o.name, compId) ? "★ " : (omkPickHasBonusInComp(o.name, compId) ? "✓ " : "");
+            opt.textContent = prefix + o.name;
+            if(omkPickIsBestInComp(o.name, compId)) opt.className = "omk-best";
+            else if(omkPickHasBonusInComp(o.name, compId)) opt.className = "omk-has-bonus";
+            if(used[o.name] && slot.op !== o.name) opt.disabled = true;
+            if(slot.op === o.name) opt.selected = true;
+            gr.appendChild(opt);
+          });
+          selOp.appendChild(gr);
+        }
+        addOptgroup("★ Лучшие в отсеке", "omk-g-best", listBest);
+        addOptgroup("✓ С бонусами в отсеке", "omk-g-bonus", listBonus);
+        addOptgroup("Остальные", "", listRest);
+        var selLev = document.createElement("select");
+        selLev.className = "level";
+        selLev.dataset.comp = ci;
+        selLev.dataset.slot = si;
+        ["Э1","Э2","Э3","Э4"].forEach(function(lab, idx){
+          var opt = document.createElement("option");
+          opt.value = idx;
+          opt.textContent = lab;
+          if(slot.lv === idx) opt.selected = true;
+          selLev.appendChild(opt);
+        });
+        selLev.disabled = !slot.op;
+        row.appendChild(selOp);
+        row.appendChild(selLev);
+        compDiv.appendChild(row);
+        if(slot.op) bonuses = bonuses.concat(omkPickBonusesFor(compId, slot.op, slot.lv));
+      }
+      var bonusDiv = document.createElement("div");
+      bonusDiv.className = "omk-bonuses";
+      if(bonuses.length) {
+        var ul = document.createElement("ul");
+        bonuses.forEach(function(b){ var li = document.createElement("li"); li.textContent = b; ul.appendChild(li); });
+        bonusDiv.appendChild(ul);
+      } else bonusDiv.textContent = "Итоговые бонусы отсека появятся после выбора оперативников.";
+      compDiv.appendChild(bonusDiv);
+      container.appendChild(compDiv);
+    });
+    container.querySelectorAll("select").forEach(function(sel){
+      sel.onchange = function(){
+        var ci = parseInt(this.dataset.comp, 10);
+        var si = parseInt(this.dataset.slot, 10);
+        if(this.classList.contains("level")){
+          omkPickState[ci][si].lv = parseInt(this.value, 10);
+        } else {
+          omkPickState[ci][si].op = this.value || null;
+          omkPickState[ci][si].lv = this.value ? 0 : 0;
+        }
+        omkPickUpdate();
+      };
+    });
+  }
+  function omkPickInit(){
+    omkPickState = OMK_COMPARTMENTS.map(function(){ return [{ op: null, lv: 0 },{ op: null, lv: 0 },{ op: null, lv: 0 }]; });
+    omkPickUpdate();
+  }
   window.equipGoBack=equipGoBack;window.essenceGoBack=essenceGoBack;
-  window.addEventListener("DOMContentLoaded",function(){equipInit();essenceInit();});
+  window.addEventListener("DOMContentLoaded",function(){equipInit();essenceInit();omkPickInit();});
 })();
   </script>
 </body>
